@@ -20,4 +20,9 @@
         android:name="com.example.proyectofinalgymmz.fragments.LocationFragment"
         android:label="fragment_location"
         tools:layout="@layout/fragment_location" />
+    <fragment
+        android:id="@+id/contactanosFragment"
+        android:name="com.example.proyectofinalgymmz.fragments.ContactanosFragment"
+        android:label="fragment_contactanos"
+        tools:layout="@layout/fragment_contactanos" />
 </navigation>

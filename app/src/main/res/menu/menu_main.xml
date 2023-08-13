@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/home"
+    <item android:id="@+id/homeFragment"
         android:title="Principal"
         android:icon="@drawable/ic_home"/>
-    <item android:id="@+id/locales"
+    <item android:id="@+id/locationFragment"
         android:title="Locales"
         android:icon="@drawable/ic_location"/>
-    <item android:id="@+id/suscripciones"
+    <item android:id="@+id/subscriptionsFragment"
         android:title="suscripcion"
-        android:icon="@drawable/ic_subscriptions"/>
-    <item android:id="@+id/contactanos"
+        android:icon="@drawable/ic_location"/>
+    <item android:id="@+id/contactanosFragment"
         android:title="Contactanos"
         android:icon="@drawable/ic_contactanos"/>
 </menu>
