@@ -1,6 +1,8 @@
 package com.example.proyectofinalgymmz
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -16,6 +18,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
+
+
+    private lateinit var sharePreferences: SharedPreferences
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var firebaseAuth: FirebaseAuth
@@ -46,6 +51,15 @@ class LoginActivity : AppCompatActivity() {
             }
 
         }
+
+        sharePreferences = this.getSharedPreferences(SESSION_PREFERENS_KEY, Context.MODE_PRIVATE)
+        val email = sharePreferences.getString(EMAIL_DATA, "")
+
+        if (email != null) {
+            if (email.isNotEmpty()){
+                goToMenu()
+            }
+        }
     }
 
     private fun authFireBAseWithGoogle(idToken: String?) {
@@ -54,6 +68,9 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this){ task->
                 if(task.isSuccessful){
                     val user = firebaseAuth.currentUser
+                    with(sharePreferences.edit()){
+                        putString(EMAIL_DATA, user?.email ).commit()
+                    }
                     goToMenu()
                 }else{
                     Toast.makeText(this, "Ocurrio un error" , Toast.LENGTH_LONG).show()
@@ -86,6 +103,9 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this){
                 if(it.isSuccessful){
                     val user =  firebaseAuth.currentUser
+                    with(sharePreferences.edit()){
+                        putString(EMAIL_DATA, user?.email ).commit()
+                    }
                     goToMenu()
                 }else{
                     Toast.makeText(this,"contraseña o usuario incorrecto",Toast.LENGTH_LONG).show()
@@ -123,5 +143,8 @@ class LoginActivity : AppCompatActivity() {
             finish()
     }
 
-
+    companion object{
+        const val SESSION_PREFERENS_KEY = "SESSION_PREFERENS_KEY"
+        const val EMAIL_DATA = "EMAIL_DATA"
+    }
 }
