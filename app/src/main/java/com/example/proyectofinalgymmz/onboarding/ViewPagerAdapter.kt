@@ -8,9 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyectofinalgymmz.databinding.BoardItemBinding
 
-class ViewPagerAdapter(
-    private val boardList: List<Board>
-    ) : RecyclerView.Adapter<ViewPagerAdapter.BoardViewHolder>() {
+class ViewPagerAdapter(private val boardList: List<Board> ,  private val clickListenerButtom: () -> Unit) : RecyclerView.Adapter<ViewPagerAdapter.BoardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardViewHolder {
         val binding = BoardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -37,7 +35,11 @@ class ViewPagerAdapter(
 
             if(adapterPosition.equals(boardList.size - 1)){
                 binding.btnNextBoard.text = "Finalizar"
+                binding.btnNextBoard.setOnClickListener {
+                    clickListenerButtom()
+                }
             }
+
 
         }
     }

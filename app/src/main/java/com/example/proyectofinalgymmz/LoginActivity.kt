@@ -5,9 +5,11 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.addTextChangedListener
 import com.example.proyectofinalgymmz.databinding.ActivityLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -39,24 +41,25 @@ class LoginActivity : AppCompatActivity() {
         setViews()
 
 
-        googleLauncher  =   registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
-            if(result.resultCode == RESULT_OK){
-                val task =  GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account =  task.getResult(ApiException::class.java)
-                    authFireBAseWithGoogle(account.idToken)
-                }catch (e: Exception){
+        googleLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                    try {
+                        val account = task.getResult(ApiException::class.java)
+                        authFireBAseWithGoogle(account.idToken)
+                    } catch (e: Exception) {
 
+                    }
                 }
-            }
 
-        }
+            }
 
         sharePreferences = this.getSharedPreferences(SESSION_PREFERENS_KEY, Context.MODE_PRIVATE)
         val email = sharePreferences.getString(EMAIL_DATA, "")
 
         if (email != null) {
-            if (email.isNotEmpty()){
+            if (email.isNotEmpty()) {
                 goToMenu()
             }
         }
@@ -65,25 +68,35 @@ class LoginActivity : AppCompatActivity() {
     private fun authFireBAseWithGoogle(idToken: String?) {
         var authCredential = GoogleAuthProvider.getCredential(idToken!!, null)
         firebaseAuth.signInWithCredential(authCredential)
-            .addOnCompleteListener(this){ task->
-                if(task.isSuccessful){
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
                     val user = firebaseAuth.currentUser
-                    with(sharePreferences.edit()){
-                        putString(EMAIL_DATA, user?.email ).commit()
+                    with(sharePreferences.edit()) {
+                        putString(EMAIL_DATA, user?.email).commit()
                     }
                     goToMenu()
-                }else{
-                    Toast.makeText(this, "Ocurrio un error" , Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Ocurrio un error", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
     private fun setViews() {
 
+
+
+        binding.etEmail.addTextChangedListener {
+                binding.btnLogin.isEnabled = validateEmailPassword(it.toString() , binding.etPassword.text.toString())
+        }
+
+        binding.etPassword.addTextChangedListener {
+                binding.btnLogin.isEnabled = validateEmailPassword(binding.etEmail.text.toString() , it.toString())
+        }
+
         binding.btnLogin.setOnClickListener {
-            val email= binding.etEmail.text.toString()
-            val password=binding.etPassword.text.toString()
-            signInWithFirebas(email,password)
+            val email = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
+            signInWithFirebas(email, password)
         }
 
         binding.btnLoginWithGoogle.setOnClickListener {
@@ -91,35 +104,37 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnSignUp.setOnClickListener {
-            val email= binding.etEmail.text.toString()
-            val password=binding.etPassword.text.toString()
-            signUpWithFirebase(email,password)
+            val email = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
+            signUpWithFirebase(email, password)
 
         }
     }
 
     private fun signInWithFirebas(email: String, password: String) {
-        firebaseAuth.signInWithEmailAndPassword(email,password)
-            .addOnCompleteListener(this){
-                if(it.isSuccessful){
-                    val user =  firebaseAuth.currentUser
-                    with(sharePreferences.edit()){
-                        putString(EMAIL_DATA, user?.email ).commit()
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) {
+                if (it.isSuccessful) {
+                    val user = firebaseAuth.currentUser
+                    with(sharePreferences.edit()) {
+                        putString(EMAIL_DATA, user?.email).commit()
                     }
                     goToMenu()
-                }else{
-                    Toast.makeText(this,"contraseña o usuario incorrecto",Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "contraseña o usuario incorrecto", Toast.LENGTH_LONG)
+                        .show()
                 }
             }
     }
 
     private fun signUpWithFirebase(email: String, password: String) {
-        firebaseAuth.createUserWithEmailAndPassword(email,password)
-            .addOnCompleteListener(this){
-                if(it.isSuccessful){
-                    Toast.makeText(this,"El usuario fue creado correctamente",Toast.LENGTH_LONG).show()
-                }else{
-                    Toast.makeText(this,"El usuario no fue creado",Toast.LENGTH_LONG).show()
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) {
+                if (it.isSuccessful) {
+                    Toast.makeText(this, "El usuario fue creado correctamente", Toast.LENGTH_LONG)
+                        .show()
+                } else {
+                    Toast.makeText(this, "El usuario no fue creado", Toast.LENGTH_LONG).show()
                 }
             }
     }
@@ -136,15 +151,22 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-
-    private fun goToMenu(){
-            val intent = Intent(this, BottonNavigationViewActivity::class.java)
-            startActivity(intent)
-            finish()
+    private fun goToMenu() {
+        val intent = Intent(this, BottonNavigationViewActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
-    companion object{
+    companion object {
         const val SESSION_PREFERENS_KEY = "SESSION_PREFERENS_KEY"
         const val EMAIL_DATA = "EMAIL_DATA"
+    }
+
+    private fun validateEmailPassword(email: String, password: String):Boolean {
+
+        val validateEmail = email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        val validatePassowod = password.length >= 8
+
+        return validateEmail && validatePassowod
     }
 }
